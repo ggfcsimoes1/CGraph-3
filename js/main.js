@@ -1,27 +1,32 @@
 /*global THREE, requestAnimationFrame, console*/
-
 var cameras = [];
 
 //Clock creation
 var clock = new THREE.Clock();
 
+var controls;
+
 var scene, renderer, currentCamera;
 
-var sphereRadius = 300;
-
-var cameraRadius = sphereRadius * 1.9
+var mesh1, mesh2, mesh3;
 
 /*Colors that will be used in the materials
 Respectively, blue, cyan, magenta, yellow, green*/
-var colors = [0x0000FF,0x00FFFF,0xFF00FF,0xFFFF00, 0x00FF00];
+var colors = [0x0000FF,0x00FFFF,0xFF00FF,0xFFFF00, 0x00FF00, 0x0AB920, 0xF79573];
 
 //auxiliary object that holds the pressed 
 //status of every key used in the program
 let keys = {
-    leftArrow : false,
+    Q : false,
+    W : false,
+    E : false,
+    R : false,
+    T : false,
+    Y : false
+    /* leftArrow : false,
     rightArrow : false,
     upArrow : false,
-    downArrow : false
+    downArrow : false */
 }
 
 /*Function responsible for creating all the objects and scene*/
@@ -30,13 +35,161 @@ function createScene() {
 
     scene = new THREE.Scene ( ) ;
 
-    planet = new Planet ( 0,0,0, sphereRadius, 30, 30, colors );
-    ship = new Ship(THREE.MathUtils.degToRad(Math.random() * 360), THREE.MathUtils.degToRad(Math.random() * 360), sphereRadius*1.2, sphereRadius/10, 8, colors, cameraRadius); // -------------Fix height
-    trash = new Trash( sphereRadius*1.2, sphereRadius/24, sphereRadius/20, 20);
+    plane = new Plane(0, -3, 0, 1000, 1000, colors[6]);
+    palanque = new Palanque(0, 0, 0, 200, 400, 400, colors[5]);
 
-    scene.add(planet.getGroup());
-    scene.add(ship.getGroup());
-    scene.add(trash.getGroup());
+    let geometry = new THREE.BufferGeometry();
+    
+    let vertices = new Float32Array( [
+        0, 0, 0,
+        0, 100, 0,
+        50,  50,  20,
+
+        0, 0, 0,
+        0, 100, 0,
+        -50, 50, 20
+    ] );
+
+    
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+    let material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    mesh1 = new THREE.Mesh( geometry, material );
+    mesh1.position.set(-200, 200, 0);
+
+    geometry = new THREE.BufferGeometry();
+    
+    let vertices1 = new Float32Array( [
+        0, 0, 0,
+        0, 100, 0,
+        17,  80,  5,
+
+        0, 0, 0,
+        0, 100, 0,
+        -17,  80,  5,
+
+        0, 0, 0,
+        -17,  80,  5,
+        -2,  75,  3,
+
+        0, 0, 0,
+        17,  80,  5,
+        2,  75,  3,
+
+        0, 0, 0,
+        15.5,  70,  5,
+        2,  75,  3,
+
+        0, 0, 0,
+        -15.5,  70,  5,
+        -2,  75,  3,
+
+        0, 0, 0,
+        15.5,  70,  5,
+        2,  70,  -1,
+
+        0, 0, 0,
+        -15.5,  70,  5,
+        -2,  70,  -1,
+    ] );
+
+    
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices1, 3 ) );
+    material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    mesh2 = new THREE.Mesh( geometry, material );
+    mesh2.position.set(200, 200, 0);
+
+
+    geometry = new THREE.BufferGeometry();
+    
+    let vertices2 = new Float32Array( [
+        //face--
+        0, 11, 0,
+        6.5, 0, 3,
+        27,  15,  1,
+
+        6.5, 0, 3,
+        27,  15,  1,
+        23, 0, 4,
+        //face--
+        0, 11, 0,
+        6.5, 0, -3,
+        27,  15,  -1,
+
+        6.5, 0, -3,
+        27,  15, -1,
+        23, 0, -4,
+        //face--
+        0, 11, 0,
+        6.5, 0, 3,
+        27,  15,  1,
+
+        6.5, 0, 3,
+        27,  15,  1,
+        36.5, 1, 4,
+        //face--
+        0, 11, 0,
+        6.5, 0, -3,
+        27,  15,  -1,
+
+        6.5, 0, -3,
+        27,  15,  -1,
+        36.5, 1, -4,
+        //face--
+        0, 11, 0,
+        6.5, 0, 3,
+        51,  19,  0,
+
+        6.5, 0, 3,
+        51,  19,  0,
+        36.5, 1, 4,
+        //face--
+        0, 11, 0,
+        6.5, 0, -3,
+        51,  19,  0,
+
+        6.5, 0, -3,
+        51,  19,  0,
+        36.5, 1, -4,
+        //face--
+        0, 11, 0,
+        6.5, 0, 3,
+        21.5, 33, 0.5,
+
+        0, 11, 0,
+        20, 34.5, 0,
+        21.5, 33, 0.5,
+        //face--
+        0, 11, 0,
+        6.5, 0, -3,
+        21.5, 33, -0.5,
+
+        0, 11, 0,
+        20, 34.5, 0,
+        21.5, 33, -0.5,
+        //face--
+        3, 28.3, 0,
+        20, 34.5, 0,
+        21.5, 33, 0.5,
+
+        //face--
+        3, 28.3, 0,
+        20, 34.5, 0,
+        21.5, 33, -0.5,
+        
+    ] );
+
+    
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices2, 3 ) );
+    material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    mesh3 = new THREE.Mesh( geometry, material );
+    mesh3.position.set(0, 200, 0);
+
+
+    scene.add(mesh1);
+    scene.add(mesh2);
+    scene.add(mesh3);
+    scene.add(plane.getMesh());
+    scene.add(palanque.getGroup());
 
 }
 
@@ -50,16 +203,16 @@ function createCamera() {
                                                 window.innerHeight / - 2, 
                                                 1, 
                                                 10000 );
-    camera.position.set( 0, 0, 1000 );
+    camera.position.set( 0, 0, 500 );
     camera.lookAt( scene.position );
     cameras.push( camera );
 
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set( 0, 0, 1000 );
+    camera.position.set( 1000, 1000, 1000 );
     camera.lookAt( scene.position );
     cameras.push( camera );
 
-    currentCamera = cameras[0];
+    currentCamera = cameras[1];
 }
 
 /*Function that handles the change of the camera*/
@@ -72,10 +225,6 @@ function changePerspective(view){
             break;
         case "perspective":
             currentCamera = cameras[1];
-            currentCamera.lookAt(scene.position);
-            break;
-        case "ship":
-            currentCamera = ship.getCamera()
             currentCamera.lookAt(scene.position);
             break;
     }
@@ -113,22 +262,38 @@ function onKeyDown(e) {
 
     switch (e.keyCode) {
     case 49: //user pressed key 1, toggling normal view
-        changePerspective("orthographic");  
-        console.log("orthographic view");  
-        break;
-    case 50: //user pressed key 2
         changePerspective("perspective");
         console.log("perspective view");
         break;
-    case 51: //user pressed key 3
-        changePerspective("ship");
-        console.log("ship view");
+    case 50: //user pressed key 2
+        changePerspective("orthographic");  
+        console.log("orthographic view"); 
         break;
     case 52:
         toggleWireframe();
         console.log("wireframe view");
         break;
-    case 37: //left arrow
+    case 81: //Q
+        keys.Q = true;
+        break;
+    case 87: //W
+        keys.W = true;
+        break;
+    case 69: //E
+        keys.E = true;
+        break;
+    case 82: //R
+        keys.R = true;
+        break;
+    case 84: //T
+        keys.T = true;
+        break;
+    case 89: //Y
+        keys.Y = true;
+        break;
+
+
+    /* case 37: //left arrow
         keys.leftArrow = true
         console.log("Left arrow key press");
         break;
@@ -145,7 +310,7 @@ function onKeyDown(e) {
         keys.downArrow = true
         //ship.setRotX(THREE.MathUtils.degToRad(90));
         console.log("Down arrow key press");
-        break;  
+        break;   */
     }
 }
 
@@ -154,7 +319,25 @@ function onKeyUp(e) {
     'use strict';
 
     switch (e.keyCode) {
-    case 37: //left arrow
+        case 81: //Q
+            keys.Q = false;
+            break;
+        case 87: //W
+            keys.W = false;
+            break;
+        case 69: //E
+            keys.E = false;
+            break;
+        case 82: //R
+            keys.R = false;
+            break;
+        case 84: //T
+            keys.T = false;
+            break;
+        case 89: //Y
+            keys.Y = false;
+            break;
+    /* case 37: //left arrow
         keys.leftArrow = false;
         break;
     case 38: //up arrow
@@ -165,7 +348,8 @@ function onKeyUp(e) {
         break;
     case 40: //down arrow
         keys.downArrow = false;
-        break;
+        break; */
+    
     }
 }
 
@@ -176,27 +360,23 @@ function checkForMovements() {
     //Get current time
     var delta = clock.getDelta();
 
-    if ( keys.upArrow && keys.rightArrow)
-        ship.moveObject( "up_right", delta);
-    else if (keys.downArrow && keys.rightArrow)
-        ship.moveObject( "down_right", delta);
-    else if (keys.upArrow && keys.leftArrow)
-        ship.moveObject( "up_left", delta);
-    else if (keys.downArrow && keys.leftArrow)
-        ship.moveObject( "down_left", delta);
-    else if ( keys.leftArrow )
-        ship.moveObject( "left", delta);
-    else if ( keys.rightArrow )
-        ship.moveObject( "right", delta);
-    else if ( keys.upArrow )
-        ship.moveObject( "up", delta);
-    else if ( keys.downArrow )
-        ship.moveObject( "down", delta);
+    if (keys.Q)
+        mesh1.rotateY(THREE.MathUtils.degToRad(-delta*40));
+    else if (keys.W)
+        mesh1.rotateY(THREE.MathUtils.degToRad(delta*40));
+    else if (keys.E)
+        mesh2.rotateY(THREE.MathUtils.degToRad(-delta*40));
+    else if (keys.R)
+        mesh2.rotateY(THREE.MathUtils.degToRad(delta*40));
+    else if (keys.T)
+        mesh3.rotateY(THREE.MathUtils.degToRad(-delta*40));
+    else if (keys.Y)
+        mesh3.rotateY(THREE.MathUtils.degToRad(delta*40));
 
     
 }
 
-/*Auxiliary function to check if the ship collides with respective trash object*/
+/* Auxiliary function to check if the ship collides with respective trash object
 function wasCollision(obj1, ship){
     obj1Position = obj1.getObj3D().position;
     shipPosition = ship.getGroup().position;
@@ -206,10 +386,10 @@ function wasCollision(obj1, ship){
             (obj1Position.x - shipPosition.x) ** 2 + 
             (obj1Position.y - shipPosition.y) ** 2 + 
             (obj1Position.z - shipPosition.z) ** 2;
-}
+} */
 
 /*Function responsible to check collisions*/
-function checkForCollisions(){
+/* function checkForCollisions(){
     let quadrant;
     const shipObj = ship.getGroup();
     if(shipObj.position.y >= 0) {
@@ -237,7 +417,7 @@ function checkForCollisions(){
             console.log(quadrant.length);
         }
     } 
-}
+} */
 
 /*Shows the output in the browser according to the camera*/
 function render() {
@@ -257,6 +437,8 @@ function init() {
 
     createScene();
     createCamera();
+    controls = new THREE.OrbitControls(currentCamera, renderer.domElement);
+    controls.update();
 
     render();
 
@@ -270,5 +452,5 @@ function animate() {
     requestAnimationFrame( animate );    
     render();
     checkForMovements();
-    checkForCollisions();
+    controls.update();
 }
