@@ -1,4 +1,4 @@
-/*global THREE, requestAnimationFrame, console*/
+/*global THREE, requestAnimationFrame, console, dat*/
 var cameras = [];
 
 //Clock creation
@@ -35,8 +35,31 @@ function createScene() {
 
     scene = new THREE.Scene ( ) ;
 
-    plane = new Plane(0, -3, 0, 1000, 1000, colors[6]);
-    palanque = new Palanque(0, 0, 0, 200, 400, 400, colors[5]);
+    const color = 0xFFFFFF;
+    const intensity = 1;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(0, 230, 0);
+    light.target.position.set(0, 0, 0);
+    scene.add(light);
+    scene.add(light.target);
+
+    const helper = new THREE.DirectionalLightHelper( light, 50 );
+    scene.add( helper );
+
+
+    let material = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    let material1 = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });
+    let material2 = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });
+
+
+    const gui = new dat.GUI();
+    gui.add(light, 'intensity', 0, 2, 0.01);
+    gui.add(light.target.position, 'x', -1000, 1000);
+    gui.add(light.target.position, 'z', -1000, 1000);
+    gui.add(light.target.position, 'y', 0, 1000);
+
+    plane = new Plane(0, -3, 0, 1000, 1000, material1);
+    palanque = new Palanque(0, 0, 0, 200, 400, 400, material2);
 
     let geometry = new THREE.BufferGeometry();
     
@@ -52,7 +75,7 @@ function createScene() {
 
     
     geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-    let material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    
     mesh1 = new THREE.Mesh( geometry, material );
     mesh1.position.set(-200, 200, 0);
 
@@ -94,7 +117,7 @@ function createScene() {
 
     
     geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices1, 3 ) );
-    material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    material = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
     mesh2 = new THREE.Mesh( geometry, material );
     mesh2.position.set(200, 200, 0);
 
@@ -180,7 +203,7 @@ function createScene() {
 
     
     geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices2, 3 ) );
-    material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    material = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
     mesh3 = new THREE.Mesh( geometry, material );
     mesh3.position.set(0, 200, 0);
 

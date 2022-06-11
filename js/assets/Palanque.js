@@ -4,20 +4,19 @@ The planet that is used in the game.
 var palanque;
 
 class Palanque {
-    constructor ( x,y,z, height, width, length, color) {
+    constructor ( x,y,z, height, width, length, material) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.width = width;
         this.length = length;
         this.height = height;
-        this.color = color;
+        this.material = material;
 
         this.group = new THREE.Group ( );
-        
-        let material = new THREE.MeshBasicMaterial ( { color: color, wireframe: false } );
+
         let geometry = new THREE.BoxGeometry ( width, height/2, length );
-        let mesh = new THREE.Mesh ( geometry, material );
+        let mesh = new THREE.Mesh ( geometry, this.material );
         
         let box = new THREE.Object3D ( );
         box.position.set(0, height/4, 0);
@@ -25,9 +24,8 @@ class Palanque {
 
         this.group.add(box);
 
-        material = new THREE.MeshBasicMaterial ( { color: color + 100, wireframe: false } );
         geometry = new THREE.BoxGeometry ( width, height/2, length/2 );
-        mesh = new THREE.Mesh ( geometry, material );
+        mesh = new THREE.Mesh ( geometry, this.material );
 
         box = new THREE.Object3D ( );
         box.add ( mesh );
@@ -41,10 +39,6 @@ class Palanque {
     //returns the created mesh
     getMesh() {
         return this.mesh;
-    }
-    //returns the object's color
-    getColor() {
-        return this.color;
     }
     //returns the group created in the constructor
     getGroup() {
