@@ -10,9 +10,13 @@ var scene, renderer, currentCamera;
 
 var mesh1, mesh2, mesh3;
 
+var light, spotLight, spotLight2, spotLight3;
+
 /*Colors that will be used in the materials
 Respectively, blue, cyan, magenta, yellow, green*/
 var colors = [0x0000FF,0x00FFFF,0xFF00FF,0xFFFF00, 0x00FF00, 0x0AB920, 0xF79573];
+
+var material = [0, 0, 0, 0, 0];
 
 //auxiliary object that holds the pressed 
 //status of every key used in the program
@@ -35,21 +39,38 @@ function createScene() {
 
     scene = new THREE.Scene ( ) ;
 
+    //---------------------------------Light---------------
+
     const color = 0xFFFFFF;
     const intensity = 1;
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(0, 230, 0);
-    light.target.position.set(0, 0, 0);
-    scene.add(light);
-    scene.add(light.target);
+    light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(0, 300, 150);
+    light.target.position.set(0, 0, -100);
 
     const helper = new THREE.DirectionalLightHelper( light, 50 );
     scene.add( helper );
 
+    spotLight = new THREE.SpotLight( color, 1, 0, Math.PI / 6, 1);
+    spotLight.position.set( -130, 400, -100 );
+    spotLight.target.position.set(-130, 0, -100);
 
-    let material = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-    let material1 = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });
-    let material2 = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });
+    /* const helper1 = new THREE.SpotLightHelper( spotLight, 50);
+    scene.add( helper1 ); */
+
+    
+    spotLight2 = new THREE.SpotLight( color, 1, 0, Math.PI / 6, 1);
+    spotLight2.position.set( 0, 400, -100 );
+    spotLight2.target.position.set(0, 0, -100);
+    
+    spotLight3 = new THREE.SpotLight( color, 1, 0, Math.PI / 6, 1);
+    spotLight3.position.set( 100, 400, -100 );
+    spotLight3.target.position.set(100, 0, -100);
+
+    material[0] = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });
+    material[1] = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });
+    material[2] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    material[3] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    material[4] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
 
 
     const gui = new dat.GUI();
@@ -58,8 +79,12 @@ function createScene() {
     gui.add(light.target.position, 'z', -1000, 1000);
     gui.add(light.target.position, 'y', 0, 1000);
 
-    plane = new Plane(0, -3, 0, 1000, 1000, material1);
-    palanque = new Palanque(0, 0, 0, 200, 400, 400, material2);
+    //----------------------------------Plane & Palanque-------------
+
+    plane = new Plane(0, -3, 0, 1000, 1000, material[0]);
+    palanque = new Palanque(0, 0, 0, 200, 400, 400, material[1]);
+
+    //---------------------------------Origamis------------------------
 
     let geometry = new THREE.BufferGeometry();
     
@@ -75,9 +100,9 @@ function createScene() {
 
     
     geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-    
-    mesh1 = new THREE.Mesh( geometry, material );
-    mesh1.position.set(-200, 200, 0);
+    geometry.computeVertexNormals();
+    mesh1 = new THREE.Mesh( geometry, material[2] );
+    mesh1.position.set(-130, 200, -100);
 
     geometry = new THREE.BufferGeometry();
     
@@ -117,9 +142,9 @@ function createScene() {
 
     
     geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices1, 3 ) );
-    material = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-    mesh2 = new THREE.Mesh( geometry, material );
-    mesh2.position.set(200, 200, 0);
+    geometry.computeVertexNormals();
+    mesh2 = new THREE.Mesh( geometry, material[3] );
+    mesh2.position.set(0, 200, -100);
 
 
     geometry = new THREE.BufferGeometry();
@@ -203,9 +228,19 @@ function createScene() {
 
     
     geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices2, 3 ) );
-    material = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-    mesh3 = new THREE.Mesh( geometry, material );
-    mesh3.position.set(0, 200, 0);
+    geometry.computeVertexNormals();
+    mesh3 = new THREE.Mesh( geometry, material[4] );
+    mesh3.position.set(100, 200, -100);
+
+
+    scene.add(light);
+    scene.add(light.target);
+    scene.add(spotLight);
+    scene.add(spotLight.target);
+    scene.add(spotLight2);
+    scene.add(spotLight2.target);
+    scene.add(spotLight3);
+    scene.add(spotLight3.target);
 
 
     scene.add(mesh1);
@@ -231,7 +266,7 @@ function createCamera() {
     cameras.push( camera );
 
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set( 1000, 1000, 1000 );
+    camera.position.set( 500, 500, 500 );
     camera.lookAt( scene.position );
     cameras.push( camera );
 
@@ -398,49 +433,6 @@ function checkForMovements() {
 
     
 }
-
-/* Auxiliary function to check if the ship collides with respective trash object
-function wasCollision(obj1, ship){
-    obj1Position = obj1.getObj3D().position;
-    shipPosition = ship.getGroup().position;
-
-    //Sphere - sphere collission detection
-    return  ( obj1.getBoundaryRadius() + ship.getBoundaryRadius() ) ** 2 >= 
-            (obj1Position.x - shipPosition.x) ** 2 + 
-            (obj1Position.y - shipPosition.y) ** 2 + 
-            (obj1Position.z - shipPosition.z) ** 2;
-} */
-
-/*Function responsible to check collisions*/
-/* function checkForCollisions(){
-    let quadrant;
-    const shipObj = ship.getGroup();
-    if(shipObj.position.y >= 0) {
-        if(shipObj.position.x >=0) {
-            quadrant = trash.quadrants["north-east"];
-        } else {
-            quadrant = trash.quadrants["north-west"];
-        }
-    } else {
-        if(shipObj.position.x >=0) {
-            quadrant = trash.quadrants["south-east"];
-        } else {
-            quadrant = trash.quadrants["south-west"];
-        }
-    }
-
-    //Iterate every thrash object according to the quadrant where the ship is located
-    for ( i = 0; i < quadrant.length; i++ ) {
-        if ( wasCollision(quadrant[i], ship) ){
-            console.log("collision");
-            quadrant[i].getMesh().visible = false;
-
-            //Remove trash object from the array
-            quadrant.splice(i, 1);
-            console.log(quadrant.length);
-        }
-    } 
-} */
 
 /*Shows the output in the browser according to the camera*/
 function render() {
