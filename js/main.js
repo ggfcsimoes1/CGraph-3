@@ -10,7 +10,7 @@ var scene, renderer, currentCamera;
 
 var mesh1, mesh2, mesh3;
 
-var light, spotLight, spotLight2, spotLight3;
+var light, spotLight, spotLight2, spotLight3, spotLight3D, spotLight3D1, spotLight3D2;
 
 /*Colors that will be used in the materials
 Respectively, blue, cyan, magenta, yellow, green*/
@@ -39,10 +39,28 @@ function createScene() {
 
     scene = new THREE.Scene ( ) ;
 
+    const texture = new THREE.TextureLoader().load( "js/assets/textures/origami_paper.jpg" );
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set( 4, 4 );
+
+    material[0] = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });
+    material[1] = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });
+    material[2] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, map:texture });
+    material[3] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, map:texture });
+    material[4] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, map:texture });
+    material[5] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0xffffff });
+
+
     //---------------------------------Light---------------
 
+    spotLight3D = new Spotlight(-130,400,-100,50,25,material[1], material[5]); 
+    spotLight3D1 = new Spotlight(0,400,-100,50,25,material[1], material[5]); 
+    spotLight3D2 = new Spotlight(130,400,-100,50,25,material[1], material[5]); 
+    
+
     const color = 0xFFFFFF;
-    const intensity = 1;
+    const intensity = 0.7;
     light = new THREE.DirectionalLight(color, intensity);
     light.position.set(0, 300, 150);
     light.target.position.set(0, 0, -100);
@@ -65,12 +83,6 @@ function createScene() {
     spotLight3 = new THREE.SpotLight( color, 1, 0, Math.PI / 6, 1);
     spotLight3.position.set( 100, 400, -100 );
     spotLight3.target.position.set(100, 0, -100);
-
-    material[0] = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });
-    material[1] = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });
-    material[2] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-    material[3] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-    material[4] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
 
 
     const gui = new dat.GUI();
@@ -231,6 +243,10 @@ function createScene() {
     geometry.computeVertexNormals();
     mesh3 = new THREE.Mesh( geometry, material[4] );
     mesh3.position.set(100, 200, -100);
+
+    scene.add ( spotLight3D.getGroup() );
+    scene.add ( spotLight3D1.getGroup() );
+    scene.add ( spotLight3D2.getGroup() );
 
 
     scene.add(light);

@@ -1,6 +1,3 @@
-/*
-The planet that is used in the game.
-*/
 var palanque;
 
 class Palanque {
