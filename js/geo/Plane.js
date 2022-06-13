@@ -27,4 +27,14 @@ class Plane {
         this.obj3D.position.x = radius * Math.sin(theta) * Math.sin(phi);
         this.obj3D.position.y = radius * Math.cos(phi);
     }
+
+    /* alternateMaterial(){
+        if (this.mat) {
+            this.mesh.material = this.materialPhong;
+            this.mat = false;
+        } else {
+            this.mesh.material = this.materialLambert;
+            this.mat = true;
+        }
+    } */
 }

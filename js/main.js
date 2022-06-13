@@ -6,11 +6,17 @@ var clock = new THREE.Clock();
 
 var controls;
 
+var lightsON = true;
+
 var scene, renderer, currentCamera;
 
-var mesh1, mesh2, mesh3;
+var origami1, origami2, origami3;
 
-var light, spotLight, spotLight2, spotLight3, spotLight3D, spotLight3D1, spotLight3D2;
+var ambLight, light, spotLight, spotLight2, spotLight3;
+
+var ambInt, dirInt, spotInt;
+
+var spotLight3D, spotLight3D1, spotLight3D2;
 
 /*Colors that will be used in the materials
 Respectively, blue, cyan, magenta, yellow, green*/
@@ -27,10 +33,6 @@ let keys = {
     R : false,
     T : false,
     Y : false
-    /* leftArrow : false,
-    rightArrow : false,
-    upArrow : false,
-    downArrow : false */
 }
 
 /*Function responsible for creating all the objects and scene*/
@@ -44,52 +46,11 @@ function createScene() {
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set( 4, 4 );
 
-    material[0] = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });
-    material[1] = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });
-    material[2] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, map:texture });
-    material[3] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, map:texture });
-    material[4] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, map:texture });
-    material[5] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0xffffff });
+    material[0] = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });//Plane
+    material[1] = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });//Palanque
+    material[5] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0xffffff });//SpotLight's
 
-
-    //---------------------------------Light---------------
-
-    spotLight3D = new Spotlight(-130,400,-100,50,25,material[1], material[5]); 
-    spotLight3D1 = new Spotlight(0,400,-100,50,25,material[1], material[5]); 
-    spotLight3D2 = new Spotlight(130,400,-100,50,25,material[1], material[5]); 
-    
-
-    const color = 0xFFFFFF;
-    const intensity = 0.7;
-    light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(0, 300, 150);
-    light.target.position.set(0, 0, -100);
-
-    const helper = new THREE.DirectionalLightHelper( light, 50 );
-    scene.add( helper );
-
-    spotLight = new THREE.SpotLight( color, 1, 0, Math.PI / 6, 1);
-    spotLight.position.set( -130, 400, -100 );
-    spotLight.target.position.set(-130, 0, -100);
-
-    /* const helper1 = new THREE.SpotLightHelper( spotLight, 50);
-    scene.add( helper1 ); */
-
-    
-    spotLight2 = new THREE.SpotLight( color, 1, 0, Math.PI / 6, 1);
-    spotLight2.position.set( 0, 400, -100 );
-    spotLight2.target.position.set(0, 0, -100);
-    
-    spotLight3 = new THREE.SpotLight( color, 1, 0, Math.PI / 6, 1);
-    spotLight3.position.set( 100, 400, -100 );
-    spotLight3.target.position.set(100, 0, -100);
-
-
-    const gui = new dat.GUI();
-    gui.add(light, 'intensity', 0, 2, 0.01);
-    gui.add(light.target.position, 'x', -1000, 1000);
-    gui.add(light.target.position, 'z', -1000, 1000);
-    gui.add(light.target.position, 'y', 0, 1000);
+    addLight();
 
     //----------------------------------Plane & Palanque-------------
 
@@ -97,8 +58,6 @@ function createScene() {
     palanque = new Palanque(0, 0, 0, 200, 400, 400, material[1]);
 
     //---------------------------------Origamis------------------------
-
-    let geometry = new THREE.BufferGeometry();
     
     let vertices = new Float32Array( [
         0, 0, 0,
@@ -110,13 +69,8 @@ function createScene() {
         -50, 50, 20
     ] );
 
-    
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-    geometry.computeVertexNormals();
-    mesh1 = new THREE.Mesh( geometry, material[2] );
-    mesh1.position.set(-130, 200, -100);
-
-    geometry = new THREE.BufferGeometry();
+    origami1 = new Origami(-130, 200, -100, vertices, 0xffffff);
+    origami1.getMesh().rotateX(-0.1);
     
     let vertices1 = new Float32Array( [
         0, 0, 0,
@@ -152,14 +106,8 @@ function createScene() {
         -2,  70,  -1,
     ] );
 
-    
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices1, 3 ) );
-    geometry.computeVertexNormals();
-    mesh2 = new THREE.Mesh( geometry, material[3] );
-    mesh2.position.set(0, 200, -100);
-
-
-    geometry = new THREE.BufferGeometry();
+    origami2 = new Origami(0, 200, -100, vertices1, 0xffffff);
+    origami2.getMesh().rotateX(-0.1);
     
     let vertices2 = new Float32Array( [
         //face--
@@ -238,33 +186,98 @@ function createScene() {
         
     ] );
 
-    
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices2, 3 ) );
-    geometry.computeVertexNormals();
-    mesh3 = new THREE.Mesh( geometry, material[4] );
-    mesh3.position.set(100, 200, -100);
+    origami3 = new Origami(100, 200, -100, vertices2, 0xffffff);
+
+    //----------------------------------SpotLight's-------------------------
+
+    spotLight3D = new Spotlight(-130,400,-100,50,25,material[1], material[5]); 
+    spotLight3D1 = new Spotlight(0,400,-100,50,25,material[1], material[5]); 
+    spotLight3D2 = new Spotlight(130,400,-100,50,25,material[1], material[5]); 
 
     scene.add ( spotLight3D.getGroup() );
     scene.add ( spotLight3D1.getGroup() );
     scene.add ( spotLight3D2.getGroup() );
 
+    scene.add(origami1.getMesh());
+    scene.add(origami2.getMesh());
+    scene.add(origami3.getMesh());
 
-    scene.add(light);
-    scene.add(light.target);
-    scene.add(spotLight);
-    scene.add(spotLight.target);
-    scene.add(spotLight2);
-    scene.add(spotLight2.target);
-    scene.add(spotLight3);
-    scene.add(spotLight3.target);
-
-
-    scene.add(mesh1);
-    scene.add(mesh2);
-    scene.add(mesh3);
     scene.add(plane.getMesh());
     scene.add(palanque.getGroup());
 
+}
+
+
+function addLight() {
+
+    const color = 0xFFFFFF;
+    ambInt = 0;
+    dirInt = 0.6;
+    spotInt = 0.3;
+
+    ambLight = new THREE.AmbientLight(color, ambInt);
+
+    light = new THREE.DirectionalLight(color, dirInt);
+    light.position.set(50, 350, 200);
+    light.target.position.set(0,200, 0);
+
+    /* const helper = new THREE.DirectionalLightHelper( light, 50 );
+    scene.add( helper ); */
+
+    spotLight = new THREE.SpotLight( color, spotInt, 0, Math.PI / 6, 1);
+    spotLight.position.set( -130, 400, -100 );
+    spotLight.target.position.set(-130, 0, -100);
+
+    /* const helper1 = new THREE.SpotLightHelper( spotLight, 50);
+    scene.add( helper1 ); */
+
+    
+    spotLight2 = new THREE.SpotLight( color, spotInt, 0, Math.PI / 6, 1);
+    spotLight2.position.set( 0, 400, -100 );
+    spotLight2.target.position.set(0, 0, -100);
+    
+    spotLight3 = new THREE.SpotLight( color, spotInt, 0, Math.PI / 6, 1);
+    spotLight3.position.set( 100, 400, -100 );
+    spotLight3.target.position.set(100, 0, -100);
+
+
+    const gui = new dat.GUI();
+    gui.add(light, 'intensity', 0, 2, 0.01);
+    gui.add(light.target.position, 'x', -1000, 1000);
+    gui.add(light.target.position, 'z', -1000, 1000);
+    gui.add(light.target.position, 'y', 0, 1000);
+
+    scene.add(ambLight);
+    
+    scene.add(light);
+    scene.add(light.target);
+
+    scene.add(spotLight);
+    scene.add(spotLight.target);
+
+    scene.add(spotLight2);
+    scene.add(spotLight2.target);
+
+    scene.add(spotLight3);
+    scene.add(spotLight3.target);
+}
+
+function switchLights() {
+    if (lightsON) {
+        ambLight.intensity = 0;
+        light.intensity = 0;
+        spotLight.intensity = 0;
+        spotLight2.intensity = 0;
+        spotLight3.intensity = 0;
+        lightsON = false;
+    } else {
+        ambLight.intensity = ambInt;
+        light.intensity = dirInt;
+        spotLight.intensity = spotInt;
+        spotLight2.intensity = spotInt;
+        spotLight3.intensity = spotInt;
+        lightsON = true;
+    }
 }
 
 /*Function responsible for changing the position of the camera*/
@@ -277,12 +290,12 @@ function createCamera() {
                                                 window.innerHeight / - 2, 
                                                 1, 
                                                 10000 );
-    camera.position.set( 0, 0, 500 );
+    camera.position.set( 0, 200, 2000 );
     camera.lookAt( scene.position );
     cameras.push( camera );
 
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set( 500, 500, 500 );
+    camera.position.set( 0, 500, 900 );
     camera.lookAt( scene.position );
     cameras.push( camera );
 
@@ -365,26 +378,32 @@ function onKeyDown(e) {
     case 89: //Y
         keys.Y = true;
         break;
-
-
-    /* case 37: //left arrow
-        keys.leftArrow = true
-        console.log("Left arrow key press");
+    case 65: //A
+        origami1.alternateMaterial();
+        origami2.alternateMaterial();
+        origami3.alternateMaterial();
         break;
-    case 38: //up arrow
-        keys.upArrow = true
-        //ship.setRotX(THREE.MathUtils.degToRad(-90));
-        console.log("Up arrow key press"); 
+    case 83: //S
+        switchLights();
         break;
-    case 39: //right arrow
-        keys.rightArrow = true
-        console.log("Right arrow key press"); 
+    case 90: //Z
+        if (lightsON && spotLight.intensity != 0)
+            spotLight.intensity = 0;
+        else if (lightsON && spotLight.intensity == 0)
+            spotLight.intensity = spotInt;
         break;
-    case 40: //down arrow
-        keys.downArrow = true
-        //ship.setRotX(THREE.MathUtils.degToRad(90));
-        console.log("Down arrow key press");
-        break;   */
+    case 88: //X
+        if (lightsON && spotLight2.intensity != 0)
+            spotLight2.intensity = 0;
+        else if (lightsON && spotLight2.intensity == 0)
+            spotLight2.intensity = spotInt;
+        break;
+    case 67: //C
+        if (lightsON && spotLight3.intensity != 0)
+            spotLight3.intensity = 0;
+        else if (lightsON && spotLight3.intensity == 0)
+            spotLight3.intensity = spotInt;
+        break;
     }
 }
 
@@ -411,19 +430,6 @@ function onKeyUp(e) {
         case 89: //Y
             keys.Y = false;
             break;
-    /* case 37: //left arrow
-        keys.leftArrow = false;
-        break;
-    case 38: //up arrow
-        keys.upArrow = false;
-        break;
-    case 39: //right arrow
-        keys.rightArrow = false;
-        break;
-    case 40: //down arrow
-        keys.downArrow = false;
-        break; */
-    
     }
 }
 
@@ -435,17 +441,17 @@ function checkForMovements() {
     var delta = clock.getDelta();
 
     if (keys.Q)
-        mesh1.rotateY(THREE.MathUtils.degToRad(-delta*40));
+        origami1.getMesh().rotateY(THREE.MathUtils.degToRad(-delta*40));
     else if (keys.W)
-        mesh1.rotateY(THREE.MathUtils.degToRad(delta*40));
+        origami1.getMesh().rotateY(THREE.MathUtils.degToRad(delta*40));
     else if (keys.E)
-        mesh2.rotateY(THREE.MathUtils.degToRad(-delta*40));
+        origami2.getMesh().rotateY(THREE.MathUtils.degToRad(-delta*40));
     else if (keys.R)
-        mesh2.rotateY(THREE.MathUtils.degToRad(delta*40));
+        origami2.getMesh().rotateY(THREE.MathUtils.degToRad(delta*40));
     else if (keys.T)
-        mesh3.rotateY(THREE.MathUtils.degToRad(-delta*40));
+        origami3.getMesh().rotateY(THREE.MathUtils.degToRad(-delta*40));
     else if (keys.Y)
-        mesh3.rotateY(THREE.MathUtils.degToRad(delta*40));
+        origami3.getMesh().rotateY(THREE.MathUtils.degToRad(delta*40));
 
     
 }

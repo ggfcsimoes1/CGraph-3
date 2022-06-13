@@ -41,4 +41,14 @@ class Palanque {
     getGroup() {
         return this.group;
     }
+
+    /* alternateMaterial(){
+        if (this.mat) {
+            this.mesh.material = this.materialPhong;
+            this.mat = false;
+        } else {
+            this.mesh.material = this.materialLambert;
+            this.mat = true;
+        }
+    } */
 }
