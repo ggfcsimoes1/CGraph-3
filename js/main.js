@@ -1,6 +1,8 @@
 /*global THREE, requestAnimationFrame, console, dat*/
 var cameras = [];
 
+var deviceType = "POINTER";
+
 //Clock creation
 var clock = new THREE.Clock();
 
@@ -8,7 +10,7 @@ var controls;
 
 var lightsON = true;
 
-var scene, renderer, currentCamera;
+var stereoCamera, scene, renderer, currentCamera;
 
 var origami1, origami2, origami3;
 
@@ -301,6 +303,9 @@ function createCamera() {
     camera.lookAt( scene.position );
     cameras.push( camera );
 
+    stereoCamera = new THREE.StereoCamera();
+    cameras.push( stereoCamera );
+
     currentCamera = cameras[1];
 }
 
@@ -478,20 +483,54 @@ function checkForMovements() {
 /*Shows the output in the browser according to the camera*/
 function render() {
     'use strict';
-    renderer.render(scene, currentCamera);
+    //renderer.render(scene, currentCamera);
+    renderer.setAnimationLoop( function () {
+
+        renderer.render( scene, currentCamera );
+    
+    } );
 }
+
+/*function init() {
+    'use strict';
+
+    deviceType = "POINTER";
+    if('xr' in navigator) {
+        navigator.xr.isSessionSupported( 'immersive-vr' )
+            .then(function (supported) {
+                if (supported) {
+                    deviceType = "XR";
+                }
+            }).catch(function() {
+                //Do nothing for now...
+            }).finally(function() {
+                main();
+            });
+    } else {
+        main();
+    }
+}*/
 
 /*Main program*/
 function init() {
     'use strict';
+    deviceType = "POINTER";
+    if('xr' in navigator) {
+        navigator.xr.isSessionSupported( 'immersive-vr' )
+            .then(function (supported) {
+                if (supported) {
+                    deviceType = "XR";
+                }
+            })
+    }
     renderer = new THREE.WebGLRenderer({
         logarithmicDepthBuffer: true,
         antialias: true
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-
-
     document.body.appendChild(renderer.domElement);
+    renderer.xr.enabled = true; 
+
 
     createScene();
     createCamera();
@@ -503,12 +542,17 @@ function init() {
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("resize", onResize);
+    window.addEventListener('wheel', function(event) {
+        event.preventDefault();},
+        {passive: false, capture: true});
+
+    SessionHandler = new VRSessionHandler(renderer, cameras[1]);
 }
 
 /*Function responsible for animation effects*/
 function animate() {
     requestAnimationFrame( animate );      
-    render();
+    //render();
     checkForMovements();
     controls.update();
 }
