@@ -22,7 +22,7 @@ var spotLight3D, spotLight3D1, spotLight3D2;
 Respectively, blue, cyan, magenta, yellow, green*/
 var colors = [0x0000FF,0x00FFFF,0xFF00FF,0xFFFF00, 0x00FF00, 0x0AB920, 0xF79573];
 
-var material = [0, 0, 0, 0, 0];
+var material = [];
 
 //auxiliary object that holds the pressed 
 //status of every key used in the program
@@ -48,7 +48,9 @@ function createScene() {
 
     material[0] = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });//Plane
     material[1] = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });//Palanque
-    material[5] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0xffffff });//SpotLight's
+    material[2] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0xffffff }); // SpotLights 
+    material[3] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0xffffff });// (materials need to be separate so the emissive can be toggled)
+    material[4] = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0xffffff });
 
     addLight();
 
@@ -190,9 +192,9 @@ function createScene() {
 
     //----------------------------------SpotLight's-------------------------
 
-    spotLight3D = new Spotlight(-130,400,-100,50,25,material[1], material[5]); 
-    spotLight3D1 = new Spotlight(0,400,-100,50,25,material[1], material[5]); 
-    spotLight3D2 = new Spotlight(130,400,-100,50,25,material[1], material[5]); 
+    spotLight3D = new Spotlight(-130,400,-100,50,25,material[1], material[2]); 
+    spotLight3D1 = new Spotlight(0,400,-100,50,25,material[1], material[3]); 
+    spotLight3D2 = new Spotlight(130,400,-100,50,25,material[1], material[4]); 
 
     scene.add ( spotLight3D.getGroup() );
     scene.add ( spotLight3D1.getGroup() );
@@ -387,22 +389,39 @@ function onKeyDown(e) {
         switchLights();
         break;
     case 90: //Z
-        if (lightsON && spotLight.intensity != 0)
+        if (lightsON && spotLight.intensity != 0){
             spotLight.intensity = 0;
-        else if (lightsON && spotLight.intensity == 0)
+            spotLight3D.toggleEmissive(false);
+        } else if (lightsON && spotLight.intensity == 0){
             spotLight.intensity = spotInt;
+            spotLight3D.toggleEmissive(true);
+        }
         break;
     case 88: //X
-        if (lightsON && spotLight2.intensity != 0)
+        if (lightsON && spotLight2.intensity != 0){
             spotLight2.intensity = 0;
-        else if (lightsON && spotLight2.intensity == 0)
+            spotLight3D1.toggleEmissive(false);
+        } else if (lightsON && spotLight2.intensity == 0){
             spotLight2.intensity = spotInt;
+            spotLight3D1.toggleEmissive(true);
+        }
         break;
     case 67: //C
-        if (lightsON && spotLight3.intensity != 0)
+        if (lightsON && spotLight3.intensity != 0){
             spotLight3.intensity = 0;
-        else if (lightsON && spotLight3.intensity == 0)
+            spotLight3D2.toggleEmissive(false);
+        } else if (lightsON && spotLight3.intensity == 0){
             spotLight3.intensity = spotInt;
+            spotLight3D2.toggleEmissive(true);
+        }
+        break;
+    
+    case 68: //D
+        if (lightsON && light.intensity != 0){
+            light.intensity = 0;
+        } else if (lightsON && light.intensity == 0){
+            light.intensity = dirInt;
+        }
         break;
     }
 }
@@ -470,6 +489,8 @@ function init() {
         antialias: true
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
+
+
     document.body.appendChild(renderer.domElement);
 
     createScene();
@@ -486,7 +507,7 @@ function init() {
 
 /*Function responsible for animation effects*/
 function animate() {
-    requestAnimationFrame( animate );    
+    requestAnimationFrame( animate );      
     render();
     checkForMovements();
     controls.update();

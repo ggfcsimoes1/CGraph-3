@@ -19,13 +19,16 @@ class Spotlight {
         this.group.position.set(x, y, z);
         
     }
-    //returns the created mesh
-    getMesh() {
-        return this.mesh;
-    }
     //returns the group created in the constructor
     getGroup() {
         return this.group;
+    }
+    toggleEmissive(on){
+        if(on){
+            this.bulbMaterial.emissive.setHex(0xffffff);
+        } else {
+            this.bulbMaterial.emissive.setHex(0x000000);
+        }
     }
     /* alternateMaterial(){
         if (this.mat) {
