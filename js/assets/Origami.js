@@ -1,8 +1,9 @@
 class Origami {
-    constructor ( x,y,z, vertices, color, texture = null) {
+    constructor ( x,y,z, vertices, color, texture = null, uv=null) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.uv = uv;
         this.mat = false;
         this.vertices = vertices;
 
@@ -12,6 +13,7 @@ class Origami {
         this.geometry = new THREE.BufferGeometry();
     
         this.geometry.setAttribute( 'position', new THREE.BufferAttribute( this.vertices, 3 ) );
+        this.geometry.setAttribute( 'uv', new THREE.BufferAttribute( this.uv, 2 ) );
         this.geometry.computeVertexNormals();
 
         this.mesh = new THREE.Mesh( this.geometry, this.materialPhong );

@@ -41,10 +41,11 @@ let keys = {
 function createScene(isPaused) {
     'use strict';
 
-    /* const texture = new THREE.TextureLoader().load( "js/assets/textures/origami_paper.jpg" );
+    const texture = new THREE.TextureLoader().load( "js/assets/textures/origami_paper.jpg" );
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set( 4, 4 ); */
+    texture.repeat.set( 1, 0.5 );
+
 
     if (isPaused){
         let geometry=new THREE.PlaneGeometry(500,300,100);
@@ -78,7 +79,17 @@ function createScene(isPaused) {
             -50, 50, 20
         ] );
 
-        origami1 = new Origami(-130, 200, -100, vertices, 0xffffff);
+        let uv = new Float32Array( [
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+        ] );
+
+        origami1 = new Origami(-130, 200, -100, vertices, 0xffffff, texture, uv);
         origami1.getMesh().rotateX(-0.1);
         
         let vertices1 = new Float32Array( [
@@ -115,7 +126,43 @@ function createScene(isPaused) {
             -2,  70,  -1,
         ] );
 
-        origami2 = new Origami(0, 200, -100, vertices1, 0xffffff);
+
+        let uv1 = new Float32Array( [
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+        ] );
+ 
+
+        origami2 = new Origami(0, 200, -100, vertices1, 0xffffff, texture, uv1);
         origami2.getMesh().rotateX(-0.1);
         
         let vertices2 = new Float32Array( [
@@ -195,7 +242,83 @@ function createScene(isPaused) {
             
         ] );
 
-        origami3 = new Origami(100, 200, -100, vertices2, 0xffffff);
+        let uv2 = new Float32Array( [
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+
+            0,0,
+            1,0,
+            1,1,
+        ] );
+
+        
+
+        origami3 = new Origami(100, 200, -100, vertices2, 0xffffff, texture, uv2);
 
         //----------------------------------SpotLight's-------------------------
 
@@ -221,7 +344,7 @@ function createScene(isPaused) {
 function addLight() {
 
     const color = 0xFFFFFF;
-    ambInt = 0;
+    ambInt = 0.2;
     dirInt = 0.6;
     spotInt = 0.3;
 
@@ -250,12 +373,6 @@ function addLight() {
     spotLight3.position.set( 100, 400, -100 );
     spotLight3.target.position.set(100, 0, -100);
 
-
-    /* const gui = new dat.GUI();
-    gui.add(light, 'intensity', 0, 2, 0.01);
-    gui.add(light.target.position, 'x', -1000, 1000);
-    gui.add(light.target.position, 'z', -1000, 1000);
-    gui.add(light.target.position, 'y', 0, 1000); */
 
     scene.add(ambLight);
     
