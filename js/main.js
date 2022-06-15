@@ -1,7 +1,7 @@
 /*global THREE, requestAnimationFrame, console, dat*/
 var cameras = [];
 
-var deviceType = "POINTER";
+var deviceType = "MOBILE";
 
 //Clock creation
 var clock = new THREE.Clock();
@@ -491,68 +491,76 @@ function render() {
     } );
 }
 
-/*function init() {
-    'use strict';
+function hasPointerLock() {
+    let capableOfPointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+    return capableOfPointerLock;
+}
 
-    deviceType = "POINTER";
-    if('xr' in navigator) {
-        navigator.xr.isSessionSupported( 'immersive-vr' )
-            .then(function (supported) {
-                if (supported) {
-                    deviceType = "XR";
-                }
-            }).catch(function() {
-                //Do nothing for now...
-            }).finally(function() {
-                main();
-            });
-    } else {
-        main();
+function checkIfPointer() {
+    if(hasPointerLock()) {
+        deviceType = "POINTER";
     }
-}*/
+}
 
 /*Main program*/
 function init() {
+
+    function aux(){
+        console.log(deviceType);
+        renderer = new THREE.WebGLRenderer({
+        logarithmicDepthBuffer: true,
+        antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        renderer.xr.enabled = true; 
+
+
+        createScene();
+        createCamera();
+        controls = new THREE.OrbitControls(currentCamera, renderer.domElement);
+        controls.update();
+
+        render();
+
+        window.addEventListener("keydown", onKeyDown);
+        window.addEventListener("keyup", onKeyUp);
+        window.addEventListener("resize", onResize);
+        window.addEventListener('wheel', function(event) {
+            event.preventDefault();},
+            {passive: false, capture: true});
+
+        SessionHandler = new VRSessionHandler(renderer, currentCamera);
+    }
+
     'use strict';
-    deviceType = "POINTER";
     if('xr' in navigator) {
+        console.log(deviceType);
         navigator.xr.isSessionSupported( 'immersive-vr' )
             .then(function (supported) {
                 if (supported) {
                     deviceType = "XR";
                 }
-            })
+                else {
+                    checkIfPointer();
+                }
+            }).catch(function(){
+                checkIfPointer();
+            }).finally(function(){
+                aux();
+            });
+    } else {
+        checkIfPointer();
+        aux();
     }
-    renderer = new THREE.WebGLRenderer({
-        logarithmicDepthBuffer: true,
-        antialias: true
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-    renderer.xr.enabled = true; 
-
-
-    createScene();
-    createCamera();
-    controls = new THREE.OrbitControls(currentCamera, renderer.domElement);
-    controls.update();
-
-    render();
-
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
-    window.addEventListener("resize", onResize);
-    window.addEventListener('wheel', function(event) {
-        event.preventDefault();},
-        {passive: false, capture: true});
-
-    SessionHandler = new VRSessionHandler(renderer, cameras[1]);
 }
 
 /*Function responsible for animation effects*/
 function animate() {
+    render();
     requestAnimationFrame( animate );      
-    //render();
     checkForMovements();
     controls.update();
+    SessionHandler.update();
 }
