@@ -6,7 +6,7 @@ var isPaused = false;
 //Clock creation
 var clock = new THREE.Clock();
 
-var controls;
+//var controls;
 
 var lightsOn = true;
 
@@ -70,9 +70,9 @@ function createScene(isPaused) {
         //---------------------------------Origamis------------------------
         
         let vertices = new Float32Array( [
-            0, 0, 0,
+            50, 50,  20,
             0, 100, 0,
-            50,  50,  20,
+            0, 0, 0,
 
             0, 0, 0,
             0, 100, 0,
@@ -90,11 +90,11 @@ function createScene(isPaused) {
         ] );
 
         origami1 = new Origami(-130, 200, -100, vertices, 0xffffff, texture, uv);
-        origami1.getMesh().rotateX(-0.1);
+        origami1.getGroup().rotateX(-0.1);
         
         let vertices1 = new Float32Array( [
-            0, 0, 0,
             0, 100, 0,
+            0, 0, 0,
             17,  80,  5,
 
             0, 0, 0,
@@ -105,8 +105,8 @@ function createScene(isPaused) {
             -17,  80,  5,
             -2,  75,  3,
 
-            0, 0, 0,
             17,  80,  5,
+            0, 0, 0,
             2,  75,  3,
 
             0, 0, 0,
@@ -114,16 +114,16 @@ function createScene(isPaused) {
             2,  75,  3,
 
             0, 0, 0,
-            -15.5,  70,  5,
             -2,  75,  3,
-
-            0, 0, 0,
-            15.5,  70,  5,
-            2,  70,  -1,
-
-            0, 0, 0,
             -15.5,  70,  5,
-            -2,  70,  -1,
+
+            2,  70,  -2,
+            16,  70,  5,
+            0, 0, 0,
+
+            0, 0, 0,
+            -16,  70,  5,
+            -2,  70,  -2,
         ] );
 
 
@@ -163,7 +163,7 @@ function createScene(isPaused) {
  
 
         origami2 = new Origami(0, 200, -100, vertices1, 0xffffff, texture, uv1);
-        origami2.getMesh().rotateX(-0.1);
+        origami2.getGroup().rotateX(-0.1);
         
         let vertices2 = new Float32Array( [
             //face--
@@ -171,21 +171,21 @@ function createScene(isPaused) {
             6.5, 0, 3,
             27,  15,  1,
 
-            6.5, 0, 3,
-            27,  15,  1,
             23, 0, 4,
+            27,  15,  1,
+            6.5, 0, 3,
             //face--
+            6.5, 0, -3,
+            27,  15,  -1,// acabou-se a tinta para pintar esta face!! XD
             0, 11, 0,
-            6.5, 0, -3,
-            27,  15,  -1,
 
-            6.5, 0, -3,
             27,  15, -1,
             23, 0, -4,
+            6.5, 0, -3,
             //face--
+            27,  15,  1,
             0, 11, 0,
             6.5, 0, 3,
-            27,  15,  1,
 
             6.5, 0, 3,
             27,  15,  1,
@@ -196,28 +196,28 @@ function createScene(isPaused) {
             27,  15,  -1,
 
             6.5, 0, -3,
-            27,  15,  -1,
             36.5, 1, -4,
+            27,  15,  -1,
             //face--
             0, 11, 0,
             6.5, 0, 3,
             51,  19,  0,
 
-            6.5, 0, 3,
             51,  19,  0,
+            6.5, 0, 3,
             36.5, 1, 4,
             //face--
             0, 11, 0,
-            6.5, 0, -3,
             51,  19,  0,
+            6.5, 0, -3,
 
-            6.5, 0, -3,
-            51,  19,  0,
             36.5, 1, -4,
+            6.5, 0, -3,
+            51,  19,  0,
             //face--
             0, 11, 0,
-            6.5, 0, 3,
             21.5, 33, 0.5,
+            6.5, 0, 3,
 
             0, 11, 0,
             20, 34.5, 0,
@@ -228,11 +228,11 @@ function createScene(isPaused) {
             21.5, 33, -0.5,
 
             0, 11, 0,
-            20, 34.5, 0,
             21.5, 33, -0.5,
+            20, 34.5, 0,
             //face--
+            20, 34.5, 0,
             3, 28.3, 0,
-            20, 34.5, 0,
             21.5, 33, 0.5,
 
             //face--
@@ -330,9 +330,9 @@ function createScene(isPaused) {
         scene.add ( spotLight3D1.getGroup() );
         scene.add ( spotLight3D2.getGroup() );
 
-        scene.add(origami1.getMesh());
-        scene.add(origami2.getMesh());
-        scene.add(origami3.getMesh());
+        scene.add(origami1.getGroup());
+        scene.add(origami2.getGroup());
+        scene.add(origami3.getGroup());
 
         scene.add(plane.getMesh());
         scene.add(palanque.getGroup());
@@ -418,9 +418,9 @@ function resetScene(){
     spotLight3D2.toggleEmissive(true);
     lightsOn = true;
 
-    origami1.getMesh().rotation.y = 0;
-    origami2.getMesh().rotation.y = 0;
-    origami3.getMesh().rotation.y = 0;
+    origami1.getGroup().rotation.y = 0;
+    origami2.getGroup().rotation.y = 0;
+    origami3.getGroup().rotation.y = 0;
 }
 
 /*Function responsible for changing the position of the camera*/
@@ -626,17 +626,17 @@ function checkForMovements() {
     }
     
     if (keys.Q)
-        origami1.getMesh().rotateY(THREE.MathUtils.degToRad(-delta*40));
-    else if (keys.W)
-        origami1.getMesh().rotateY(THREE.MathUtils.degToRad(delta*40));
-    else if (keys.E)
-        origami2.getMesh().rotateY(THREE.MathUtils.degToRad(-delta*40));
-    else if (keys.R)
-        origami2.getMesh().rotateY(THREE.MathUtils.degToRad(delta*40));
-    else if (keys.T)
-        origami3.getMesh().rotateY(THREE.MathUtils.degToRad(-delta*40));
-    else if (keys.Y)
-        origami3.getMesh().rotateY(THREE.MathUtils.degToRad(delta*40));
+        origami1.getGroup().rotateY(THREE.MathUtils.degToRad(-delta*40));
+    if (keys.W)
+        origami1.getGroup().rotateY(THREE.MathUtils.degToRad(delta*40));
+    if (keys.E)
+        origami2.getGroup().rotateY(THREE.MathUtils.degToRad(-delta*40));
+    if (keys.R)
+        origami2.getGroup().rotateY(THREE.MathUtils.degToRad(delta*40));
+    if (keys.T)
+        origami3.getGroup().rotateY(THREE.MathUtils.degToRad(-delta*40));
+    if (keys.Y)
+        origami3.getGroup().rotateY(THREE.MathUtils.degToRad(delta*40));
 
     
 }
@@ -674,12 +674,10 @@ function init() {
     createScene(true);
     createScene(false);
 
-    createCamera(scene, cameras); //regular scened
+    createCamera(scene, cameras); //regular scene
 
-    controls = new THREE.OrbitControls(currentCamera, renderer.domElement);
-    controls.update();
-
-    
+    /* controls = new THREE.OrbitControls(currentCamera, renderer.domElement);
+    controls.update(); */
 
     render();
     
@@ -696,5 +694,5 @@ function animate() {
     renderer.setAnimationLoop( animate ); 
     render();     
     checkForMovements();
-    controls.update();
+    //controls.update();
 }

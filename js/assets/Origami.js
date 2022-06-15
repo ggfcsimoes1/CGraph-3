@@ -7,8 +7,11 @@ class Origami {
         this.mat = false;
         this.vertices = vertices;
 
-        this.materialPhong = new THREE.MeshPhongMaterial({ color: color, side: THREE.DoubleSide, map: texture });
-        this.materialLambert = new THREE.MeshLambertMaterial({ color: color, side: THREE.DoubleSide, map: texture }); 
+        this.frontMaterialPhong = new THREE.MeshPhongMaterial( { map: texture, side: THREE.FrontSide } );
+        this.frontMaterialLambert = new THREE.MeshLambertMaterial({ map: texture, side: THREE.DoubleSide});
+
+        this.backMaterialPhong = new THREE.MeshPhongMaterial( { color: color, side: THREE.BackSide } );
+        this.backMaterialLambert = new THREE.MeshPhongMaterial( { color: color, side: THREE.BackSide } );
 
         this.geometry = new THREE.BufferGeometry();
     
@@ -16,21 +19,28 @@ class Origami {
         this.geometry.setAttribute( 'uv', new THREE.BufferAttribute( this.uv, 2 ) );
         this.geometry.computeVertexNormals();
 
-        this.mesh = new THREE.Mesh( this.geometry, this.materialPhong );
-        this.mesh.position.set(this.x, this.y, this.z);
+        this.group = new THREE.Group();
+        this.frontMesh = new THREE.Mesh( this.geometry, this.frontMaterialPhong);
+        this.backMesh = new THREE.Mesh( this.geometry, this.backMaterialPhong );
 
+        this.group.add( this.frontMesh );
+        this.group.add( this.backMesh );
+
+        this.group.position.set(this.x, this.y, this.z);
     }
     //returns the created mesh
-    getMesh() {
-        return this.mesh;
+    getGroup() {
+        return this.group;
     }
 
     alternateMaterial(){
         if (this.mat) {
-            this.mesh.material = this.materialPhong;
+            this.frontMesh.material = this.frontMaterialPhong;
+            this.backMesh.material = this.backMaterialPhong;
             this.mat = false;
         } else {
-            this.mesh.material = this.materialLambert;
+            this.frontMesh.material = this.frontMaterialLambert;
+            this.backMesh.material = this.backMaterialLambert;
             this.mat = true;
         }
     }
