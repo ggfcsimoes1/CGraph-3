@@ -5,12 +5,12 @@ class VRSessionHandler {
 		if (deviceType == "XR")
         	document.body.appendChild(VRButton.createButton(renderer));
 		else if(deviceType == "POINTER")
-			this.setupPointerStartButton(camera);
-		else if(deviceTyepe == "MOBILE")
+			this.setUpPointerStartButton(camera);
+		else if(deviceType == "MOBILE")
 			this.setUpMobileStartButton(camera);
     }
 
-	setupMobileStartButton(camera) {
+	setUpMobileStartButton(camera) {
         this.div = document.createElement('div');
         this.button = document.createElement('button');
         this.button.innerText = "MOBILE MODE";
@@ -24,7 +24,7 @@ class VRSessionHandler {
         });
     }
 
-    setupPointerStartButton(camera) {
+    setUpPointerStartButton(camera) {
         this.div = document.createElement('div');
         this.button = document.createElement('button');
         this.button.innerText = "VISTA VR";

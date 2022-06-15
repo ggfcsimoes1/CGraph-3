@@ -1,8 +1,6 @@
 /*global THREE, requestAnimationFrame, console, dat*/
 var cameras = [];
 
-var deviceType = "MOBILE";
-
 //Clock creation
 var clock = new THREE.Clock();
 
@@ -43,10 +41,10 @@ function createScene() {
 
     scene = new THREE.Scene ( ) ;
 
-    const texture = new THREE.TextureLoader().load( "js/assets/textures/origami_paper.jpg" );
+    /* const texture = new THREE.TextureLoader().load( "js/assets/textures/origami_paper.jpg" );
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set( 4, 4 );
+    texture.repeat.set( 4, 4 ); */
 
     material[0] = new THREE.MeshPhongMaterial({ color: colors[1], side: THREE.DoubleSide });//Plane
     material[1] = new THREE.MeshPhongMaterial({ color: colors[2], side: THREE.DoubleSide });//Palanque
@@ -245,11 +243,11 @@ function addLight() {
     spotLight3.target.position.set(100, 0, -100);
 
 
-    const gui = new dat.GUI();
+    /* const gui = new dat.GUI();
     gui.add(light, 'intensity', 0, 2, 0.01);
     gui.add(light.target.position, 'x', -1000, 1000);
     gui.add(light.target.position, 'z', -1000, 1000);
-    gui.add(light.target.position, 'y', 0, 1000);
+    gui.add(light.target.position, 'y', 0, 1000); */
 
     scene.add(ambLight);
     
@@ -483,84 +481,42 @@ function checkForMovements() {
 /*Shows the output in the browser according to the camera*/
 function render() {
     'use strict';
-    //renderer.render(scene, currentCamera);
-    renderer.setAnimationLoop( function () {
-
-        renderer.render( scene, currentCamera );
-    
-    } );
-}
-
-function hasPointerLock() {
-    let capableOfPointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
-    return capableOfPointerLock;
-}
-
-function checkIfPointer() {
-    if(hasPointerLock()) {
-        deviceType = "POINTER";
-    }
+    renderer.render(scene, currentCamera);
 }
 
 /*Main program*/
 function init() {
 
-    function aux(){
-        console.log(deviceType);
-        renderer = new THREE.WebGLRenderer({
-        logarithmicDepthBuffer: true,
-        antialias: true
-        });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        renderer.xr.enabled = true; 
-
-
-        createScene();
-        createCamera();
-        controls = new THREE.OrbitControls(currentCamera, renderer.domElement);
-        controls.update();
-
-        render();
-
-        window.addEventListener("keydown", onKeyDown);
-        window.addEventListener("keyup", onKeyUp);
-        window.addEventListener("resize", onResize);
-        window.addEventListener('wheel', function(event) {
-            event.preventDefault();},
-            {passive: false, capture: true});
-
-        SessionHandler = new VRSessionHandler(renderer, currentCamera);
-    }
-
     'use strict';
-    if('xr' in navigator) {
-        console.log(deviceType);
-        navigator.xr.isSessionSupported( 'immersive-vr' )
-            .then(function (supported) {
-                if (supported) {
-                    deviceType = "XR";
-                }
-                else {
-                    checkIfPointer();
-                }
-            }).catch(function(){
-                checkIfPointer();
-            }).finally(function(){
-                aux();
-            });
-    } else {
-        checkIfPointer();
-        aux();
-    }
+
+    renderer = new THREE.WebGLRenderer({
+    logarithmicDepthBuffer: true,
+    antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.xr.enabled = true;
+    document.body.appendChild(renderer.domElement);
+    document.body.appendChild( VRButton.createButton( renderer ) ); 
+
+    createScene();
+    createCamera();
+    controls = new THREE.OrbitControls(currentCamera, renderer.domElement);
+    controls.update();
+
+    render();
+    
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("resize", onResize);
+    window.addEventListener('wheel', function(event) {
+        event.preventDefault();},
+        {passive: false, capture: true});
 }
 
 /*Function responsible for animation effects*/
 function animate() {
-    render();
-    requestAnimationFrame( animate );      
+    renderer.setAnimationLoop( animate ); 
+    render();     
     checkForMovements();
     controls.update();
-    SessionHandler.update();
 }
