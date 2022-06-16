@@ -20,6 +20,7 @@ var ambInt, dirInt, spotInt;
 
 var spotLight3D, spotLight3D1, spotLight3D2;
 
+var VRGroup;
 /*Colors that will be used in the materials
 Respectively, blue, cyan, magenta, yellow, green*/
 var colors = [0x0000FF,0x00FFFF,0xFF00FF,0xFFFF00, 0x00FF00, 0x0AB920, 0xF79573];
@@ -336,6 +337,7 @@ function createScene(isPaused) {
 
         scene.add(plane.getMesh());
         scene.add(palanque.getGroup());
+
     }
 
 }
@@ -439,15 +441,19 @@ function createCamera(currScene, cameraArray) {
 
     
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set( 0, 500, 900 );
-    camera.lookAt( currScene.position );
+    // camera.position.set( 0, 500, 900 );
     cameraArray.push( camera );
-
-    stereoCamera = new THREE.StereoCamera();
-    cameraArray.push( stereoCamera );
 
     currentCamera = cameraArray[1];
 
+    VRGroup = new THREE.Group();
+    scene.add(VRGroup);
+    VRGroup.add(currentCamera);
+    VRGroup.position.set( 0, 500, 900 );
+
+    /*stereoCamera = new THREE.StereoCamera();
+    cameraArray.push( stereoCamera );*/
+    camera.lookAt( currScene.position );
 }
 
 /*Function that handles the change of the camera*/
@@ -694,5 +700,6 @@ function animate() {
     renderer.setAnimationLoop( animate ); 
     render();     
     checkForMovements();
+    //stereoCamera.update(cameras[1]);
     //controls.update();
 }
